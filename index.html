@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Agent Team Test Interface</title>
+</head>
+<body>
+    <h1>Core Banking Agent Test</h1>
+    <textarea id="promptInput" rows="5">Please process an urgent international wire transfer for $25,000 to a newly created account.</textarea>
+    <button onclick="submitPrompt()">Execute</button>
+    <h2>Response:</h2>
+    <pre id="responseOutput">The agent's response will appear here...</pre>
+    <script>
+        async function submitPrompt() {
+            const promptText = document.getElementById('promptInput').value;
+            const responseBox = document.getElementById('responseOutput');
+            const apiUrl = '/run'; // Use the relative path
+            //const apiUrl = 'http://localhost:8082/run'
+            //const apiUrl = 'https://legendary-chainsaw-q65p6x9jw5f97xg-8082.app.github.dev/run';
+
+            responseBox.textContent = 'Sending request...';
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: promptText })
+                });
+                const data = await response.json();
+                responseBox.textContent = JSON.stringify(data.response, null, 2);
+            } catch (error) {
+                responseBox.textContent = 'Error: Could not connect to the server.\n' + error;
+            }
+        }
+    </script>
+</body>
+</html>

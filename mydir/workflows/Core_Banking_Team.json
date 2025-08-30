@@ -1,0 +1,249 @@
+{
+  "provider": "autogen_agentchat.teams.RoundRobinGroupChat",
+  "component_type": "team",
+  "version": 2,
+  "component_version": 2,
+  "description": "A managed team of specialist agents for processing core banking transactions. The workflow includes transaction monitoring, fraud detection, and compliance checks, orchestrated by a manager agent.",
+  "label": "Core Banking Team",
+  "config": {
+    "admin_name": "front_office_agent",
+    "participants": [
+      {
+        "provider": "autogen_agentchat.agents.AssistantAgent",
+        "component_type": "agent",
+        "version": 2,
+        "component_version": 2,
+        "description": "Acts as the orchestrator for the core banking team. It manages the conversation flow by calling specialist agents in a specific, conditional sequence to process a user's request.",
+        "label": "Front Office Agent",
+        "config": {
+          "name": "front_office_agent",
+          "model_client": {
+            "provider": "autogen_ext.models.openai.OpenAIChatCompletionClient",
+            "component_type": "model",
+            "version": 2,
+            "component_version": 2,
+            "description": "Chat completion client for OpenAI hosted models.",
+            "label": "OpenAIChatCompletionClient",
+            "config": {
+              "model": "gpt-4o-mini",
+              "api_key": ""
+            }
+          },
+          "workbench": [
+            {
+              "provider": "autogen_core.tools.StaticWorkbench",
+              "component_type": "workbench",
+              "version": 2,
+              "component_version": 2,
+              "description": "A workbench that provides a static set of tools that do not change after\n    each tool execution.",
+              "label": "StaticWorkbench",
+              "config": {
+                "tools": [
+                  {
+                    "provider": "autogen_core.tools.FunctionTool",
+                    "component_type": "tool",
+                    "version": 2,
+                    "component_version": 2,
+                    "description": "Create custom tools by wrapping standard Python functions.",
+                    "label": "FunctionTool",
+                    "config": {
+                      "source_code": "def calculator(a: float, b: float, operator: str) -> str:\n    try:\n        if operator == \"+\":\n            return str(a + b)\n        elif operator == \"-\":\n            return str(a - b)\n        elif operator == \"*\":\n            return str(a * b)\n        elif operator == \"/\":\n            if b == 0:\n                return \"Error: Division by zero\"\n            return str(a / b)\n        else:\n            return \"Error: Invalid operator. Please use +, -, *, or /\"\n    except Exception as e:\n        return f\"Error: {str(e)}\"\n",
+                      "name": "calculator",
+                      "description": "A simple calculator that performs basic arithmetic operations",
+                      "global_imports": [],
+                      "has_cancellation_support": false
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "model_context": {
+            "provider": "autogen_core.model_context.UnboundedChatCompletionContext",
+            "component_type": "chat_completion_context",
+            "version": 2,
+            "component_version": 2,
+            "description": "An unbounded chat completion context that keeps a view of the all the messages.",
+            "label": "UnboundedChatCompletionContext",
+            "config": {}
+          },
+          "description": "An agent that provides assistance with ability to use tools.",
+          "system_message": "You are a workflow orchestrator. Your job is to get a final assessment from the fraud_detection_agent.\n1. Call the `transaction_monitoring_agent`.\n2. If the response is 'SUSPICIOUS', call the `fraud_detection_agent`.\n3. After the `fraud_detection_agent` responds, your job is done. Your final message should be ONLY the word TERMINATE.",
+          "model_client_stream": false,
+          "reflect_on_tool_use": false,
+          "tool_call_summary_format": "{result}",
+          "metadata": {}
+        }
+      },
+      {
+        "provider": "autogen_agentchat.agents.AssistantAgent",
+        "component_type": "agent",
+        "version": 2,
+        "component_version": 2,
+        "description": "Performs the initial evaluation of a financial transaction to determine if it is 'NORMAL' or 'SUSPICIOUS', acting as the first step in the analysis workflow.",
+        "label": "Transaction Monitoring Agent",
+        "config": {
+          "name": "transaction_monitoring_agent",
+          "model_client": {
+            "provider": "autogen_ext.models.openai.OpenAIChatCompletionClient",
+            "component_type": "model",
+            "version": 2,
+            "component_version": 2,
+            "description": "Chat completion client for OpenAI hosted models.",
+            "label": "OpenAIChatCompletionClient",
+            "config": {
+              "model": "gpt-4o-mini",
+              "api_key": ""
+            }
+          },
+          "workbench": [
+            {
+              "provider": "autogen_core.tools.StaticWorkbench",
+              "component_type": "workbench",
+              "version": 2,
+              "component_version": 2,
+              "description": "A workbench that provides a static set of tools that do not change after\n    each tool execution.",
+              "label": "StaticWorkbench",
+              "config": {
+                "tools": [
+                  {
+                    "provider": "autogen_core.tools.FunctionTool",
+                    "component_type": "tool",
+                    "version": 2,
+                    "component_version": 2,
+                    "description": "Create custom tools by wrapping standard Python functions.",
+                    "label": "FunctionTool",
+                    "config": {
+                      "source_code": "def calculator(a: float, b: float, operator: str) -> str:\n    try:\n        if operator == \"+\":\n            return str(a + b)\n        elif operator == \"-\":\n            return str(a - b)\n        elif operator == \"*\":\n            return str(a * b)\n        elif operator == \"/\":\n            if b == 0:\n                return \"Error: Division by zero\"\n            return str(a / b)\n        else:\n            return \"Error: Invalid operator. Please use +, -, *, or /\"\n    except Exception as e:\n        return f\"Error: {str(e)}\"\n",
+                      "name": "calculator",
+                      "description": "A simple calculator that performs basic arithmetic operations",
+                      "global_imports": [],
+                      "has_cancellation_support": false
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "model_context": {
+            "provider": "autogen_core.model_context.UnboundedChatCompletionContext",
+            "component_type": "chat_completion_context",
+            "version": 2,
+            "component_version": 2,
+            "description": "An unbounded chat completion context that keeps a view of the all the messages.",
+            "label": "UnboundedChatCompletionContext",
+            "config": {}
+          },
+          "description": "An agent that provides assistance with ability to use tools.",
+          "system_message": "You are a specialist that performs an initial evaluation of a financial transaction. Your only purpose is to determine if the transaction is normal or suspicious.\n\nYour final output must be one of these two words, followed by a brief reason:\n\n'NORMAL': [Provide a one-sentence justification]\n\n'SUSPICIOUS': [Provide a one-sentence justification]",
+          "model_client_stream": false,
+          "reflect_on_tool_use": false,
+          "tool_call_summary_format": "{result}",
+          "metadata": {}
+        }
+      },
+      {
+        "provider": "autogen_agentchat.agents.AssistantAgent",
+        "component_type": "agent",
+        "version": 2,
+        "component_version": 2,
+        "description": "A specialist agent that performs a deep-dive analysis on transactions already flagged as suspicious. It uses advanced checks to confirm or deny fraudulent activity.",
+        "label": "Fraud Detection Agent",
+        "config": {
+          "name": "fraud_detection_agent",
+          "model_client": {
+            "provider": "autogen_ext.models.openai.OpenAIChatCompletionClient",
+            "component_type": "model",
+            "version": 2,
+            "component_version": 2,
+            "description": "Chat completion client for OpenAI hosted models.",
+            "label": "OpenAIChatCompletionClient",
+            "config": {
+              "model": "gpt-4o-mini",
+              "api_key": ""
+            }
+          },
+          "workbench": [
+            {
+              "provider": "autogen_core.tools.StaticWorkbench",
+              "component_type": "workbench",
+              "version": 2,
+              "component_version": 2,
+              "description": "A workbench that provides a static set of tools that do not change after\n    each tool execution.",
+              "label": "StaticWorkbench",
+              "config": {
+                "tools": [
+                  {
+                    "provider": "autogen_core.tools.FunctionTool",
+                    "component_type": "tool",
+                    "version": 2,
+                    "component_version": 2,
+                    "description": "Create custom tools by wrapping standard Python functions.",
+                    "label": "FunctionTool",
+                    "config": {
+                      "source_code": "def calculator(a: float, b: float, operator: str) -> str:\n    try:\n        if operator == \"+\":\n            return str(a + b)\n        elif operator == \"-\":\n            return str(a - b)\n        elif operator == \"*\":\n            return str(a * b)\n        elif operator == \"/\":\n            if b == 0:\n                return \"Error: Division by zero\"\n            return str(a / b)\n        else:\n            return \"Error: Invalid operator. Please use +, -, *, or /\"\n    except Exception as e:\n        return f\"Error: {str(e)}\"\n",
+                      "name": "calculator",
+                      "description": "A simple calculator that performs basic arithmetic operations",
+                      "global_imports": [],
+                      "has_cancellation_support": false
+                    }
+                  }
+                ]
+              }
+            }
+          ],
+          "model_context": {
+            "provider": "autogen_core.model_context.UnboundedChatCompletionContext",
+            "component_type": "chat_completion_context",
+            "version": 2,
+            "component_version": 2,
+            "description": "An unbounded chat completion context that keeps a view of the all the messages.",
+            "label": "UnboundedChatCompletionContext",
+            "config": {}
+          },
+          "description": "An agent that provides assistance with ability to use tools.",
+          "system_message": "You are a Fraud Detection specialist. You only get involved when a transaction has already been flagged as suspicious. Your job is to perform a deeper analysis using advanced ML patterns to confirm or deny fraudulent activity. State your findings clearly.",
+          "model_client_stream": false,
+          "reflect_on_tool_use": false,
+          "tool_call_summary_format": "{result}",
+          "metadata": {}
+        }
+      }
+    ],
+    "termination_condition": {
+      "provider": "autogen_agentchat.base.OrTerminationCondition",
+      "component_type": "termination",
+      "version": 2,
+      "component_version": 2,
+      "label": "OrTerminationCondition",
+      "config": {
+        "conditions": [
+          {
+            "provider": "autogen_agentchat.conditions.TextMentionTermination",
+            "component_type": "termination",
+            "version": 2,
+            "component_version": 2,
+            "description": "Terminate the conversation if a specific text is mentioned.",
+            "label": "TextMentionTermination",
+            "config": {
+              "text": "TERMINATE"
+            }
+          },
+          {
+            "provider": "autogen_agentchat.conditions.MaxMessageTermination",
+            "component_type": "termination",
+            "version": 2,
+            "component_version": 2,
+            "description": "Terminate the conversation after a maximum number of messages have been exchanged.",
+            "label": "MaxMessageTermination",
+            "config": {
+              "max_messages": 10,
+              "include_agent_event": false
+            }
+          }
+        ]
+      }
+    },
+    "emit_team_events": false
+  }
+}
